@@ -15,7 +15,7 @@ Open http://127.0.0.1:5173. No credentials are needed locally. Create an account
 
 ## Hosted backend
 
-Use Supabase Auth and Postgres. Follow [FULLSTACK_DEPLOYMENT.md](./FULLSTACK_DEPLOYMENT.md) for the SQL migration, environment variables, authentication/email setup, free Render preview deployment and Vercel alternative. Hosted instances never fall back to SQLite. Real hosted Supabase auth/email must be verified after you configure your own project.
+The selected stack is **Vercel + Supabase**: Vercel runs the full Next.js website and API routes; Supabase provides Auth and Postgres. Render is not required. Follow [FULLSTACK_DEPLOYMENT.md](./FULLSTACK_DEPLOYMENT.md) for the SQL migration, environment variables, authentication/email setup and Vercel deployment. Hosted instances never fall back to SQLite. Real hosted Supabase auth/email must be verified after you configure your own project.
 
 ## Checks
 
@@ -46,7 +46,7 @@ The database test runs the actual migration against embedded Postgres with simul
 | `components/request-form.tsx` | Authenticated callback, service and package requests |
 | `lib/content.ts` | Contact details, recovery categories and informational copy |
 | `app/globals.css` | Existing design system plus shop and account layouts |
-| `lib/site-config.ts` | Canonical site URL for Vercel, Render or a custom domain |
+| `lib/site-config.ts` | Canonical site URL for Vercel or a custom domain |
 
 Changing live demo prices requires updating both `lib/catalog.ts` (display) and Supabase's `products` rows (authoritative checkout). Do not accept prices or user IDs from browser totals. Cart contents persist on this browser only; account records persist in the configured database.
 

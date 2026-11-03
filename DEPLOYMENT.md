@@ -18,7 +18,7 @@ Repository: https://github.com/AtharvaRathi/Truora-Website
 | Project name | `truora-website` or another available name |
 | Framework preset | **Next.js** |
 | Root directory | Repository root (`./`); do not enter `truora` |
-| Production branch | `main` |
+| Release branch | `feature/commerce-accounts` for the current account/commerce iteration; `main` after merge |
 | Node.js version | **24.x**, pinned by `package.json` |
 | Install command | `npm ci` |
 | Build command | `npm run build` |
