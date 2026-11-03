@@ -16,9 +16,9 @@ export const steps=[
 ];
 export const faqs=[
  {q:'What is Truora?',a:'Truora brings rental equipment, recovery supplies and post-surgery care services into one coordinated package. We’re preparing to launch in Mumbai, starting with orthopedic surgeries.'},
- {q:'Is Truora available in Mumbai yet?',a:'Not yet. Mumbai is our planned first service area. This website introduces our approach; bookings and online enquiries are not currently enabled. You can contact us by phone, WhatsApp or email for general information.'},
+ {q:'Is Truora available in Mumbai yet?',a:'Not yet. Mumbai is our planned first service area. The site now supports demo orders and service requests through a shared account. No real delivery or care is arranged. You can contact us by phone, WhatsApp or email for general information.'},
  {q:'What will a recovery package include?',a:'The package approach brings together rental equipment, supplies, care visits and a named coordinator. Exact inclusions, visit schedules, rental durations and availability will be confirmed before any service agreement.'},
  {q:'Will care follow my surgeon’s instructions?',a:'Our planned service will be organised around your surgeon’s discharge instructions. The website provides general information and does not prescribe a recovery plan or replace advice from your treating team.'},
  {q:'Are the prices on this website final?',a:'No. All displayed prices are indicative planning figures and may change before launch. Final inclusions, availability, fees and any deposit will be confirmed before you agree to a package.'},
- {q:'Can I book or pay through the website?',a:'Online booking and payments are not available in this introductory release. You can explore our approach and contact the team directly for information.'},
+ {q:'Can I book or pay through the website?',a:'You can create an account, explore demo purchases and rentals, submit a demo order and save service requests. No payment is collected, and no delivery, rental reservation or appointment is confirmed.'},
 ];

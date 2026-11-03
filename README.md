@@ -1,60 +1,61 @@
-# Truora Website
+# Truora app
 
-The initial informational website for Truora’s planned surgery recovery services in Mumbai. Built with native Next.js App Router, React, TypeScript and Tailwind CSS, ready for Vercel.
+Next.js 16, React, TypeScript and Tailwind CSS. One account for product purchases, equipment rentals and recovery service requests. The catalog and all transactions are demonstrations; no payment or real fulfilment occurs. Mumbai remains pre-launch.
 
-## Local development
+## Run locally
 
-Use Node.js 24 (also specified in `.nvmrc` and `package.json`).
+Use Node.js 24.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173. No sign-in, backend credentials or environment variables are needed for the introductory website.
+Open http://127.0.0.1:5173. No credentials are needed locally. Create an account on the signup page. The development adapter stores hashed passwords and records in `.local/truora.sqlite`, ignored by Git. No email is sent locally; password recovery exposes a clearly labelled one-use development reset link. Use test details.
 
-## Verify the production build
+## Hosted backend
+
+Use Supabase Auth and Postgres. Follow [FULLSTACK_DEPLOYMENT.md](./FULLSTACK_DEPLOYMENT.md) for the SQL migration, environment variables, authentication/email setup, free Render preview deployment and Vercel alternative. Hosted instances never fall back to SQLite. Real hosted Supabase auth/email must be verified after you configure your own project.
+
+## Checks
 
 ```sh
 npm run build
 npm run typecheck
-npm start
+npm run test:database
+# While the local development server is running:
+npm run test:api
 ```
 
-`npm start` serves the production build at http://127.0.0.1:5173. Stop the development server before starting it on the same port.
+The database test runs the actual migration against embedded Postgres with simulated Supabase roles/identity. It verifies pricing, transaction rollback, idempotency, RLS and denied writes. The API test exercises local signup, sessions, profile changes, orders, requests, cross-origin rejection, password reset and cross-account access using synthetic accounts that it removes afterwards. It refuses to run against the hosted Supabase backend.
 
-## Deploy on Vercel
+`npm start` serves a built site at localhost:5173; `npm run start:hosted` listens on 0.0.0.0 and the hosting platform's PORT. Production/hosted accounts require Supabase configuration.
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for the dashboard steps, exact settings and custom-domain instructions. `vercel.json` configures the Next.js preset, `npm ci` and `npm run build`. Vercel manages the output directory.
+## Key files
 
-## Content and components
-
-| Location | Purpose |
+| File | Purpose |
 | --- | --- |
-| `lib/content.ts` | Phone, email, WhatsApp, six surgery categories, temporary prices, FAQs and recovery steps |
-| `lib/site-config.ts` | Public site origin and preview-deployment indexing behaviour |
-| `app/page.tsx` | Homepage |
-| `app/packages/` | Package index and six surgery detail pages |
-| `app/about`, `app/how-it-works`, `app/contact`, `app/privacy` | Informational pages |
-| `components/site.tsx` | Navigation, footer, cards, FAQ interactions and reveal animations |
-| `app/globals.css` | Typography, colours, layouts, responsive styles and motion |
-| `public/` | Logo, original illustrative hero, icons and locally hosted fonts |
+| `lib/catalog.ts` | Two demo product specifications, images and display prices (integer paise) |
+| `supabase/migrations/001_initial.sql` | Hosted schema, seed prices, RLS and authoritative order/request functions |
+| `lib/backend.ts`, `lib/local-db.ts` | Supabase and local development adapters |
+| `app/api/[...path]/route.ts` | Validated account, authentication, order and request API |
+| `app/auth/confirm/route.ts` | Email confirmation and recovery callback |
+| `components/app-provider.tsx` | Shared session state and browser-persisted cart |
+| `components/catalog.tsx`, `components/checkout.tsx` | Product/rental selection, cart and checkout |
+| `components/auth-screen.tsx`, `components/account.tsx` | Shared login/signup/recovery/profile/order area |
+| `components/request-form.tsx` | Authenticated callback, service and package requests |
+| `lib/content.ts` | Contact details, recovery categories and informational copy |
+| `app/globals.css` | Existing design system plus shop and account layouts |
+| `lib/site-config.ts` | Canonical site URL for Vercel, Render or a custom domain |
 
-## Current release status
+Changing live demo prices requires updating both `lib/catalog.ts` (display) and Supabase's `products` rows (authoritative checkout). Do not accept prices or user IDs from browser totals. Cart contents persist on this browser only; account records persist in the configured database.
 
-- Mumbai is planned, not live.
-- Prices are indicative planning figures and may change.
-- Phone/WhatsApp: +91 7798200771.
-- Email: pranjalrathi1907@gmail.com.
-- Enquiry forms, booking, payments, accounts and medical-document uploads are not enabled.
-- No analytics or advertising trackers have been added.
+## Current scope
 
-Before services launch, confirm coverage, package inclusions, prices, deposits, rental terms and policies. Update the privacy page to reflect actual operations as features are introduced.
+- BP Machine and Wheelchair, both purchase and 7/30-day rental options, sample pricing and deposits.
+- Signup, login/logout, email confirmation and password recovery integration, editable shared profile.
+- Cart quantity/removal, protected checkout, persisted order details/history.
+- Callback, service and recovery package requests saved in the same account.
+- No real payment gateway, stock reservation, dispatch, clinical scheduling, automated callback delivery or public admin dashboard. Project owners inspect demo records in Supabase Table Editor.
 
-## Assets
-
-The supplied logo is preserved in `public/images/truora-logo.png`. The hero image is illustrative AI-generated imagery, not an existing patient or member of staff. Original prompt, asset provenance and font licenses are documented in [ASSETS.md](./ASSETS.md).
-
-## Runtime
-
-This checkout runs native Next.js and has no dependency on the previous Sites/Cloudflare runtime or ChatGPT authentication. All routes work with Vercel’s normal Next.js integration.
+Assets, original generation prompts and font licenses are documented in [ASSETS.md](./ASSETS.md).

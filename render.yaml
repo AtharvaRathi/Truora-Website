@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: truora-demo
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start:hosted
+    envVars:
+      - key: APP_BACKEND
+        value: supabase
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+        sync: false

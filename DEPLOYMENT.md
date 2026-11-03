@@ -1,3 +1,5 @@
+> **The app now includes accounts, orders and service requests. Follow [FULLSTACK_DEPLOYMENT.md](./FULLSTACK_DEPLOYMENT.md) first for the required Supabase setup.** The basic Vercel import instructions below still apply, but hosted accounts now require the Supabase environment variables.
+
 # Deploy Truora on Vercel
 
 Repository: https://github.com/AtharvaRathi/Truora-Website
@@ -21,9 +23,9 @@ Repository: https://github.com/AtharvaRathi/Truora-Website
 | Install command | `npm ci` |
 | Build command | `npm run build` |
 | Output directory | Leave the Next.js default; do not enter `dist`, `out` or `public` |
-| Environment variables | None required for this initial release |
+| Environment variables | `APP_BACKEND`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (see full-stack guide) |
 
-The repository's `vercel.json` already declares the framework and install/build commands. No database, Cloudflare binding, API key or authentication configuration is required.
+The repository's `vercel.json` already declares the framework and install/build commands. The shared-account release requires the Supabase database migration and auth settings from `FULLSTACK_DEPLOYMENT.md`. No Cloudflare binding is required.
 
 ## 3. Deploy
 
@@ -33,7 +35,7 @@ The repository's `vercel.json` already declares the framework and install/build 
 4. Visit Home, Packages, a surgery detail page, How It Works, Our Story and Contact. Refresh a nested page to verify direct navigation.
 5. Check the mobile menu and FAQ controls, then verify the phone, email and WhatsApp destinations.
 
-The site continues to display Mumbai as **Coming soon** and prices as indicative. Deployment does not activate booking, payment or enquiry forms.
+The site continues to display Mumbai as **Coming soon** and prices as indicative. Demo orders, callbacks and service requests are enabled once Supabase is configured. Deployment does not charge payments or arrange real fulfilment.
 
 ## 4. Public URL and SEO
 
