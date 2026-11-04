@@ -59,3 +59,7 @@ Changing live demo prices requires updating both `lib/catalog.ts` (display) and 
 - No real payment gateway, stock reservation, dispatch, clinical scheduling, automated callback delivery or public admin dashboard. Project owners inspect demo records in Supabase Table Editor.
 
 Assets, original generation prompts and font licenses are documented in [ASSETS.md](./ASSETS.md).
+
+## Connected recovery packages
+
+See [RECOVERY_PACKAGES.md](RECOVERY_PACKAGES.md) for spreadsheet interpretation, customizer flow, migration 002 and care-team status updates. Existing Supabase projects need migration 002 before deploying the connected package release.

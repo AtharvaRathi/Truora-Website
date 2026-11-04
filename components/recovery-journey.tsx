@@ -1,0 +1,12 @@
+'use client';
+import Link from 'next/link';
+import { Check, Circle, Clock3 } from 'lucide-react';
+import { money, lineLabel } from '@/lib/catalog';
+import { recoveryStages, type RecoveryPlan } from '@/lib/packages';
+import type { Order } from '@/lib/validation';
+
+export function RecoveryJourney({plan,order,compact=false}:{plan:RecoveryPlan;order?:Order;compact?:boolean}) {
+ const stage=recoveryStages.findIndex(s=>s.id===plan.status),cancelled=plan.status==='cancelled';
+ const items=order?.items.filter(i=>i.packageSlug===plan.package_slug)||[];
+ return <article className="recovery-journey"><div className="journey-heading"><div><span className="tiny-label">RECOVERY PACKAGE · {plan.id.slice(0,8).toUpperCase()}</span><h2>{plan.name}</h2><p>Saved {new Date(plan.created_at).toLocaleDateString('en-IN')}</p></div><span className="journey-status"><Clock3 size={15}/>{cancelled?'Cancelled':recoveryStages[stage]?.title||'Status unavailable'}</span></div><p className="journey-notice">Demo package · No care, delivery or appointment is confirmed. Status changes are recorded by the care team after review.</p><ol className="recovery-timeline" aria-label="Recovery package progress">{recoveryStages.map((s,i)=><li key={s.id} className={!cancelled&&i<=stage?'reached':''} aria-current={!cancelled&&i===stage?'step':undefined}><span className="timeline-dot">{!cancelled&&i<stage?<Check size={14}/>:<Circle size={12}/>}</span><div><strong>{s.title}</strong>{!compact&&<p>{s.description}</p>}<small>{plan.events.find(e=>e.status===s.id)?new Date(plan.events.find(e=>e.status===s.id)!.at).toLocaleString('en-IN'):i>stage?'Not started':''}</small></div></li>)}</ol>{compact?<Link href={`/account/recovery/${plan.id}`} className="text-link">View plan & progress →</Link>:<><h3>Your saved selections</h3>{items.map((item,i)=><div className="summary-line" key={i}><span>{item.name} × {item.quantity}<small>{lineLabel({...item,mode:item.mode as 'purchase'|'rental'|'service'})}</small></span><strong>{money(item.unitPrice*item.quantity)}</strong></div>)}<details className="journey-history"><summary>Status history</summary>{plan.events.map((event,i)=><p key={i}><strong>{recoveryStages.find(s=>s.id===event.status)?.title||event.status}</strong><br/>{new Date(event.at).toLocaleString('en-IN')} · {event.note}</p>)}</details><Link href={`/account/orders/${plan.order_id}`} className="text-link">View linked order →</Link></>}</article>;
+}

@@ -1,27 +1,30 @@
-export type CartLine = { productId: string; mode: 'purchase' | 'rental'; quantity: number; days: 7 | 30 };
-export const products = [
-  {
-    id: 'bp-machine', name: 'BP Machine', subtitle: 'A simpler check-in at home.', category: 'HOME MONITORING', image: '/images/bp-machine.webp',
-    price: 179900, mrp: 229900, rental7: 39900, rental30: 99900, deposit: 50000,
-    description: 'A fictional upper-arm digital blood pressure monitor for exploring Truora’s shopping experience. A clear display and a simple control layout make up this sample configuration.',
-    features: ['One-touch operation', 'Large digital display', 'Upper-arm cuff included', 'Compact tabletop design'],
-    specs: [['Type', 'Automatic upper-arm monitor'], ['Display', 'Digital LCD'], ['Power', 'Battery operated'], ['In the demo box', 'Monitor, cuff, tubing and sample guide']],
-    note: 'Illustrative specifications only. This is not a verified medical device listing, and no accuracy, certification or clinical suitability claim is made.',
-  },
-  {
-    id: 'wheelchair', name: 'Wheelchair', subtitle: 'A little more freedom to move.', category: 'MOBILITY SUPPORT', image: '/images/wheelchair.webp',
-    price: 649900, mrp: 799900, rental7: 59900, rental30: 149900, deposit: 200000,
-    description: 'A fictional folding manual wheelchair for exploring equipment purchases and rentals. This sample model pairs a metal frame with a dark upholstered seat and removable footrests.',
-    features: ['Folding manual frame', 'Large rear wheels with hand rims', 'Padded armrests', 'Paired footrests'],
-    specs: [['Type', 'Manual folding wheelchair'], ['Frame', 'Metal frame, sample configuration'], ['Upholstery', 'Dark fabric seat and back'], ['In the demo box', 'Wheelchair, footrests and sample guide']],
-    note: 'Dimensions, weight capacity, fit and suitability must be verified for a real product before use. This demo listing does not confirm any of these specifications.',
-  },
-] as const;
+import data from './data/phase-one.json';
+export type CartLine = { productId: string; mode: 'purchase' | 'rental' | 'service'; quantity: number; days: number; packageSlug?: string };
+export const catalog = data.items.map(item => ({...item,
+ image: item.id==='bp-machine'?'/images/bp-machine.webp':item.id==='wheelchair'?'/images/wheelchair.webp':'/images/recovery-essential.svg',
+ subtitle: item.kind==='service'?'Care, connected to your recovery.':'Practical support for recovery at home.',
+ description: `${item.name}, available as a sample ${item.kind==='service'?'care service':'recovery essential'} on its own or within a customized recovery package.`,
+ features: ['Available in recovery packages', 'Shared account and order history', 'Sample pricing for this iteration'],
+ specs: [['Listing', 'Sample catalog item'], ['Unit', item.unit], ['Availability', 'Demo only · Mumbai launch planned']],
+ note: 'Suggested package contents are sample planning templates, not a prescription. Your treating team must confirm device fit, specifications, quantities and the appropriate care plan.',
+}));
+export const products = catalog.filter(p=>p.kind!=='service');
+export const services = catalog.filter(p=>p.kind==='service');
+export const rentalProducts = products.filter(p=>p.rental7>0);
 export const money = (paise: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(paise / 100);
-export function getProduct(id: string) { return products.find(p => p.id === id); }
-export function linePrice(line: CartLine) { const p = getProduct(line.productId); if (!p) throw new Error('Unknown product'); return line.mode === 'purchase' ? p.price : line.days === 7 ? p.rental7 : p.rental30; }
-export function cartTotals(lines: CartLine[]) {
-  const subtotal = lines.reduce((sum, line) => sum + linePrice(line) * line.quantity, 0);
-  const deposit = lines.reduce((sum, line) => sum + (line.mode === 'rental' ? getProduct(line.productId)!.deposit * line.quantity : 0), 0);
-  return { subtotal, deposit, total: subtotal + deposit };
+export function getProduct(id: string) { return catalog.find(p => p.id === id); }
+export function linePrice(line: CartLine) {
+ const p=getProduct(line.productId); if(!p)throw new Error('Unknown product');
+ if(line.mode==='rental')return p.rentalDaily?p.rentalDaily*line.days:line.days===30?p.rental30:p.rental7*Math.ceil(line.days/7);
+ return p.price;
 }
+export function validLine(line:CartLine) {
+ const p=getProduct(line.productId);
+ return !!p && (line.mode==='service'?p.kind==='service':p.kind!=='service'&&(line.mode==='purchase'?p.price>0:p.rental7>0));
+}
+export function cartTotals(lines: CartLine[]) {
+ const subtotal=lines.reduce((s,l)=>s+linePrice(l)*l.quantity,0);
+ const deposit=lines.reduce((s,l)=>s+(l.mode==='rental'?getProduct(l.productId)!.deposit*l.quantity:0),0);
+ return {subtotal,deposit,total:subtotal+deposit};
+}
+export function lineLabel(line:Pick<CartLine,'mode'|'days'>){return line.mode==='rental'?`${line.days}-day rental`:line.mode==='service'?'Care service':'Purchase'}

@@ -12,9 +12,9 @@ export async function GET(_request:Request,context:{params:Promise<{path:string[
     if(path==='auth/session')return json({user:await currentUser(),backend:backendMode()});
     if(path!=='account')throw new ApiError('Not found.',404);
     const user=await currentUser();if(!user)throw new ApiError('Sign in to continue.',401);
-    if(backendMode()==='local'){const local=await import('@/lib/local-db');return json({user,orders:local.localOrders(user.id),requests:local.localRequests(user.id)})}
-    const db=await supabase();const [orders,requests]=await Promise.all([db.from('orders').select('id,created_at,status,total,deposit,subtotal,address,items,rental_start,payment_status').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100),db.from('service_requests').select('id,created_at,kind,subject,phone,preferred_date,preferred_time,notes,status').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100)]);
-    if(orders.error||requests.error)throw new Error('Account data unavailable');return json({user,orders:orders.data,requests:requests.data});
+    if(backendMode()==='local'){const local=await import('@/lib/local-db');return json({user,orders:local.localOrders(user.id),requests:local.localRequests(user.id),recoveryPlans:local.localRecoveryPlans(user.id)})}
+    const db=await supabase();const [orders,requests,recoveryPlans]=await Promise.all([db.from('orders').select('id,created_at,status,total,deposit,subtotal,address,items,rental_start,payment_status').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100),db.from('service_requests').select('id,created_at,kind,subject,phone,preferred_date,preferred_time,notes,status').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100),db.from('recovery_plans').select('id,order_id,package_slug,name,status,created_at,updated_at,events').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100)]);
+    if(orders.error||requests.error||recoveryPlans.error)throw new Error('Account data unavailable');return json({user,orders:orders.data,requests:requests.data,recoveryPlans:recoveryPlans.data});
   }catch(error){return apiError(error)}
 }
 export async function POST(request:Request,context:{params:Promise<{path:string[]}>}){
@@ -47,7 +47,7 @@ export async function POST(request:Request,context:{params:Promise<{path:string[
     }
     if(path==='orders'){
       const input=orderSchema.parse(body);
-      if(input.lines.some(l=>l.mode==='rental')){const start=new Date(`${input.rentalStart}T00:00:00Z`);const today=new Date().toISOString().slice(0,10);if(!input.rentalStart||Number.isNaN(start.getTime())||start.toISOString().slice(0,10)!==input.rentalStart||input.rentalStart<today)throw new ApiError('Choose a valid rental start date from today onwards.')}
+      if(input.rentalStart||input.lines.some(l=>l.mode==='rental')){const start=new Date(`${input.rentalStart}T00:00:00Z`);const today=new Date().toISOString().slice(0,10);if(!input.rentalStart||Number.isNaN(start.getTime())||start.toISOString().slice(0,10)!==input.rentalStart||input.rentalStart<today)throw new ApiError('Choose a valid rental start date from today onwards.')}
       if(mode==='local'){const local=await import('@/lib/local-db');local.localRateLimit(`orders:${user.id}`,30);return json({order:local.localOrder(user.id,input)},201)}
       const {data,error}=await (await supabase()).rpc('place_demo_order',{p_lines:input.lines,p_address:input.address,p_rental_start:input.rentalStart||null,p_request_key:input.idempotencyKey});if(error)throw new ApiError('Unable to place this order. Check availability and your details, then try again.');return json({order:data},201);
     }

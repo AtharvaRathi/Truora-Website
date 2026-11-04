@@ -5,6 +5,7 @@ import { promisify } from 'node:util';
 import { mkdirSync, chmodSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { cookies } from 'next/headers';
+import { getRecoveryPackage, type RecoveryPlan } from './packages';
 import { cartTotals, getProduct, linePrice } from './catalog';
 import type { AppUser, Profile, OrderInput, Order, ServiceInput, ServiceRequest } from './validation';
 
@@ -25,6 +26,7 @@ export function localDb() {
     CREATE TABLE IF NOT EXISTS resets(token TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id) ON DELETE CASCADE,expires INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS orders(id TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id),request_key TEXT NOT NULL,payload TEXT NOT NULL,UNIQUE(user_id,request_key));
     CREATE TABLE IF NOT EXISTS requests(id TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id),request_key TEXT NOT NULL,payload TEXT NOT NULL,UNIQUE(user_id,request_key));
+    CREATE TABLE IF NOT EXISTS recovery_plans(id TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id),order_id TEXT REFERENCES orders(id),payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS rate_limits(key TEXT PRIMARY KEY,count INTEGER NOT NULL,expires INTEGER NOT NULL);`);
   return db;
 }
@@ -50,7 +52,12 @@ export function localRequests(id: string): ServiceRequest[] { return (localDb().
 export function localOrder(id: string, input: OrderInput): Order {
   const d = localDb(); const existing = d.prepare('SELECT payload FROM orders WHERE user_id=? AND request_key=?').get(id,input.idempotencyKey) as {payload:string}|undefined;
   if(existing)return JSON.parse(existing.payload);
-  const order:Order={id:randomUUID(),created_at:new Date().toISOString(),status:'demo_submitted',payment_status:'not_charged',...cartTotals(input.lines),address:input.address,rental_start:input.rentalStart||null,items:input.lines.map(l=>({productId:l.productId,name:getProduct(l.productId)!.name,mode:l.mode,quantity:l.quantity,days:l.days,unitPrice:linePrice(l),deposit:l.mode==='rental'?getProduct(l.productId)!.deposit:0}))};
-  d.prepare('INSERT INTO orders VALUES(?,?,?,?)').run(order.id,id,input.idempotencyKey,JSON.stringify(order));return order;
+  const order:Order={id:randomUUID(),created_at:new Date().toISOString(),status:'demo_submitted',payment_status:'not_charged',...cartTotals(input.lines),address:input.address,rental_start:input.rentalStart||null,items:input.lines.map(l=>({productId:l.productId,name:getProduct(l.productId)!.name,mode:l.mode,quantity:l.quantity,days:l.days,unitPrice:linePrice(l),deposit:l.mode==='rental'?getProduct(l.productId)!.deposit:0,packageSlug:l.packageSlug}))};
+  d.exec('BEGIN IMMEDIATE');try{
+  d.prepare('INSERT INTO orders VALUES(?,?,?,?)').run(order.id,id,input.idempotencyKey,JSON.stringify(order));
+  for(const slug of new Set(input.lines.map(l=>l.packageSlug).filter(Boolean))){const plan:RecoveryPlan={id:randomUUID(),order_id:order.id,package_slug:slug!,name:getRecoveryPackage(slug!)!.name,status:'submitted',created_at:order.created_at,updated_at:order.created_at,events:[{status:'submitted',at:order.created_at,note:'Demo selections saved. Awaiting coordinator review.'}]};d.prepare('INSERT INTO recovery_plans VALUES(?,?,?,?)').run(plan.id,id,order.id,JSON.stringify(plan))}
+  d.exec('COMMIT');}catch(e){d.exec('ROLLBACK');throw e}return order;
 }
 export function localRequest(id: string, input: ServiceInput): ServiceRequest { const d=localDb();const existing=d.prepare('SELECT payload FROM requests WHERE user_id=? AND request_key=?').get(id,input.idempotencyKey) as {payload:string}|undefined;if(existing)return JSON.parse(existing.payload);const request:ServiceRequest={id:randomUUID(),created_at:new Date().toISOString(),kind:input.kind,subject:input.subject,phone:input.phone,preferred_date:input.preferredDate||null,preferred_time:input.preferredTime,notes:input.notes,status:'demo_submitted'};d.prepare('INSERT INTO requests VALUES(?,?,?,?)').run(request.id,id,input.idempotencyKey,JSON.stringify(request));return request; }
+
+export function localRecoveryPlans(id:string):RecoveryPlan[]{return (localDb().prepare('SELECT payload FROM recovery_plans WHERE user_id=? ORDER BY rowid DESC').all(id) as {payload:string}[]).map(r=>JSON.parse(r.payload))}
