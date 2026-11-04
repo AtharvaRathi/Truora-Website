@@ -63,3 +63,7 @@ Assets, original generation prompts and font licenses are documented in [ASSETS.
 ## Connected recovery packages
 
 See [RECOVERY_PACKAGES.md](RECOVERY_PACKAGES.md) for spreadsheet interpretation, customizer flow, migration 002 and care-team status updates. Existing Supabase projects need migration 002 before deploying the connected package release.
+
+## Team operations portal
+
+Open `/workspace` for the CRM, recovery workflow and care-provider schedule. See [OPERATIONS_WORKSPACE.md](OPERATIONS_WORKSPACE.md) for roles, migration 003, first-admin activation and operating instructions.

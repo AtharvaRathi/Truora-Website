@@ -20,7 +20,7 @@ For an existing installation, apply `supabase/migrations/002_recovery_packages.s
 
 ## Care-team status operations
 
-Customer accounts can only read their recovery journeys; they cannot set their own fulfillment status. For this iteration, authorized operators use Supabase's SQL Editor or Table Editor to advance `public.recovery_plans.status`. A staff dashboard is not included. Verify the selected plan belongs to the intended customer and update only after the corresponding work actually occurs:
+Customer accounts can only read their recovery journeys; they cannot set their own fulfillment status. With migration 003, authorized administrators and managers can advance recovery stages in the `/workspace` operations portal. See `OPERATIONS_WORKSPACE.md`. Trusted project operators can also use the Supabase SQL Editor. Verify the selected plan belongs to the intended customer and update only after the corresponding work actually occurs:
 
 `submitted` → `reviewed` → `scheduled` → `recovering` → `collection` → `completed`
 

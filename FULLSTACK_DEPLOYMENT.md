@@ -21,7 +21,7 @@ The repository root contains `package.json`. Use that root, not the earlier `tru
 1. Sign in at https://supabase.com/dashboard and create a project on the **Free** plan.
 2. Choose an available region close to your users. Store the database password privately.
 3. Wait until the project is ready.
-4. Open **SQL Editor → New query**. Paste the full contents of `supabase/migrations/001_initial.sql` and run it **once** on this new project.
+4. Open **SQL Editor → New query**. Apply all files in `supabase/migrations/` in numeric order (001, 002, 003, 004), running each **once** on this new project.
 5. In Table Editor, verify `profiles`, `products`, `orders` and `service_requests` exist. There should be two demo products.
 6. In the project's **Connect** dialog or API settings, copy the **Project URL** and **Publishable key**. The legacy anon key can be used in the publishable-key variable if the project still uses legacy keys.
 
@@ -112,7 +112,7 @@ The route also supports the default PKCE `code` callback flow. SMTP credentials 
 6. Use **Request a callback**, or request a service/package. Verify it appears under **My account → Service requests**.
 7. Sign out. Create a second test account and verify that it cannot see the first account's orders or requests.
 8. Test forgot-password using an email address that your SMTP configuration can deliver to. Verify the link is usable once and the new password works.
-9. In Supabase Table Editor, verify records were stored. The project owner can inspect them there; no public admin dashboard is included.
+9. In Supabase Table Editor, verify records were stored. The project owner can inspect them there. Authorized team members can use `/workspace` after the first administrator is activated as described in `OPERATIONS_WORKSPACE.md`.
 
 Test local development and hosted Supabase separately. Local SQLite accounts and records do not migrate automatically to Supabase, and the browser's local cart is not a cross-device database cart.
 
@@ -146,3 +146,7 @@ This is a demo commerce/service iteration. Real launch still needs verified cata
 - Supabase email restrictions/custom SMTP: https://supabase.com/docs/guides/auth/auth-smtp
 - Next.js on Vercel: https://vercel.com/docs/frameworks/full-stack/nextjs
 - Vercel Hobby restrictions: https://vercel.com/docs/plans/hobby
+
+## Operations and recovery migrations
+
+For the current release, fresh projects must apply all SQL files in `supabase/migrations/` in numeric order (001, 002, 003, 004). Existing projects should apply only the migrations not already applied. Do not re-run earlier migrations. See `OPERATIONS_WORKSPACE.md` for first-administrator activation and staff access controls. No additional environment variables or hosting service are needed for the operations portal.

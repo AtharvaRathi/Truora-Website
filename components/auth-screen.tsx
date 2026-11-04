@@ -6,7 +6,7 @@ import { ArrowUpRight, Eye, EyeOff, HeartHandshake, LockKeyhole } from 'lucide-r
 import { api, useApp } from './app-provider';
 import { Eyebrow } from './site';
 import type { AppUser } from '@/lib/validation';
-export function safeNext(value:string|null){return value&&/^\/(checkout|account|callback|request)(\/|\?|$)/.test(value)&&!value.includes('\\')?value:'/account'}
+export function safeNext(value:string|null){return value&&/^\/(checkout|account|callback|request|workspace)(\/|\?|$)/.test(value)&&!value.includes('\\')?value:'/account'}
 export function AuthScreen({mode}:{mode:'login'|'signup'|'forgot'|'reset'}){
  const {refreshUser,backend}=useApp(),router=useRouter(),params=useSearchParams();const next=safeNext(params.get('next'));
  const [name,setName]=useState(''),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[show,setShow]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState(''),[resetUrl,setResetUrl]=useState('');
