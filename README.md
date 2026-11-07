@@ -67,3 +67,7 @@ See [RECOVERY_PACKAGES.md](RECOVERY_PACKAGES.md) for spreadsheet interpretation,
 ## Team operations portal
 
 Open `/workspace` for the CRM, recovery workflow and care-provider schedule. See [OPERATIONS_WORKSPACE.md](OPERATIONS_WORKSPACE.md) for roles, migration 003, first-admin activation and operating instructions.
+
+## Android and iOS
+
+The React Native/Expo app is in `mobile/`, with shared domain code in `packages/core/`. See [MOBILE_APP.md](MOBILE_APP.md) for included workflows, testing, account setup, realtime, notifications and release instructions. Vercel remains the website host; Supabase remains the shared backend.

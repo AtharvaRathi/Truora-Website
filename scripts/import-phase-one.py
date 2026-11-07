@@ -60,5 +60,6 @@ for p in packages:
     stated=next(r for r in package_rows if r and r[0]=='Standard price (₹)')[5+slugs.index(p['slug'])]
     assert p['price']*100==amount(stated), (p['slug'],p['price'],stated)
 public = {'items':list(items.values()),'packages':packages}
-(root/'lib/data/phase-one.json').write_text(json.dumps(public,indent=2)+'\n')
+for target in ['lib/data/phase-one.json','packages/core/data/phase-one.json']:
+    (root/target).write_text(json.dumps(public,indent=2)+'\n')
 print(f'Imported {len(items)} public catalog items and {len(packages)} reconciled packages; no internal cost or inventory fields exported.')

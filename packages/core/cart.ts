@@ -1,0 +1,2 @@
+import type {CartLine} from './catalog';
+export function mergeCart(current:CartLine[],incoming:CartLine[]):CartLine[]{const result=current.map(l=>({...l}));for(const line of incoming){const found=result.find(l=>l.productId===line.productId&&l.mode===line.mode&&l.days===line.days&&l.packageSlug===line.packageSlug);if(found)found.quantity=Math.min(60,found.quantity+line.quantity);else result.push({...line})}return result}

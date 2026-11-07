@@ -1,0 +1,5 @@
+// Local review server for the React Native web rendering. The native app uses
+// the same screens, but this preview does not test device-only integrations.
+import {createServer} from 'node:http';import {readFile,stat} from 'node:fs/promises';import {resolve,extname,sep} from 'node:path';
+const root=resolve('mobile/dist');const mime={'.html':'text/html','.js':'application/javascript','.json':'application/json','.png':'image/png','.webp':'image/webp','.ttf':'font/ttf','.ico':'image/x-icon'};
+createServer(async(req,res)=>{try{let path=resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(!path.startsWith(root+sep)&&path!==root){res.writeHead(403);return res.end()}try{if(!(await stat(path)).isFile())path=resolve(root,'index.html')}catch{path=resolve(root,'index.html')}res.writeHead(200,{'Content-Type':mime[extname(path)]||'application/octet-stream','Cache-Control':'no-store'});res.end(await readFile(path))}catch{res.writeHead(500);res.end('Preview unavailable')}}).listen(8081,'127.0.0.1',()=>console.log('Mobile screen preview: http://127.0.0.1:8081'));

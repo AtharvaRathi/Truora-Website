@@ -1,0 +1,62 @@
+name: Truora mobile release
+# Triggered only by the verified GitHub release job, after project/signing setup.
+on:
+  workflow_dispatch:
+jobs:
+  fingerprint:
+    type: fingerprint
+    environment: production
+  android_existing:
+    needs: [fingerprint]
+    type: get-build
+    params:
+      platform: android
+      profile: production
+      fingerprint_hash: ${{ needs.fingerprint.outputs.android_fingerprint_hash }}
+  ios_existing:
+    needs: [fingerprint]
+    type: get-build
+    params:
+      platform: ios
+      profile: production
+      fingerprint_hash: ${{ needs.fingerprint.outputs.ios_fingerprint_hash }}
+  android_build:
+    needs: [android_existing]
+    if: ${{ !needs.android_existing.outputs.build_id }}
+    type: build
+    params:
+      platform: android
+      profile: production
+  ios_build:
+    needs: [ios_existing]
+    if: ${{ !needs.ios_existing.outputs.build_id }}
+    type: build
+    params:
+      platform: ios
+      profile: production
+  android_submit:
+    needs: [android_build]
+    type: submit
+    params:
+      build_id: ${{ needs.android_build.outputs.build_id }}
+  ios_submit:
+    needs: [ios_build]
+    type: submit
+    params:
+      build_id: ${{ needs.ios_build.outputs.build_id }}
+  android_update:
+    needs: [android_existing]
+    if: ${{ needs.android_existing.outputs.build_id }}
+    type: update
+    environment: production
+    params:
+      branch: production
+      platform: android
+  ios_update:
+    needs: [ios_existing]
+    if: ${{ needs.ios_existing.outputs.build_id }}
+    type: update
+    environment: production
+    params:
+      branch: production
+      platform: ios

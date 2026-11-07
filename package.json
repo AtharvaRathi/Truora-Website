@@ -10,8 +10,8 @@
     "build": "next build",
     "start": "next start --hostname 127.0.0.1 --port 5173",
     "typecheck": "tsc --noEmit",
-    "test:database": "node --test tests/database.test.mjs tests/recovery.test.mjs tests/workspace.test.mjs",
-    "test:api": "node --test tests/api.test.mjs tests/workspace-api.test.mjs",
+    "test:database": "node --test tests/database.test.mjs tests/recovery.test.mjs tests/workspace.test.mjs tests/mobile-sync.test.mjs",
+    "test:api": "node --test tests/api.test.mjs tests/workspace-api.test.mjs tests/mobile-api.test.mjs",
     "start:hosted": "next start --hostname 0.0.0.0"
   },
   "dependencies": {

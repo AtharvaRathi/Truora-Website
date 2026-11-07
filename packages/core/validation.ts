@@ -1,0 +1,17 @@
+import { z } from 'zod';
+import { validLine } from './catalog';
+import { getRecoveryPackage } from './packages';
+export const emailSchema = z.string().trim().toLowerCase().email().max(254);
+export const passwordSchema = z.string().min(10, 'Use at least 10 characters.').max(128);
+export const profileSchema = z.object({ name: z.string().trim().min(2).max(80), phone: z.string().trim().regex(/^\+?[\d ()-]{7,20}$/, 'Enter a valid phone number.').or(z.literal('')), address: z.string().trim().max(300), city: z.string().trim().max(80), pincode: z.string().regex(/^\d{6}$/, 'Use a six-digit PIN code.').or(z.literal('')) });
+export const signupSchema = z.object({ name: z.string().trim().min(2).max(80), email: emailSchema, password: passwordSchema });
+export const loginSchema = z.object({ email: emailSchema, password: z.string().min(1).max(128) });
+export const lineSchema = z.object({ productId: z.string().min(1).max(100), mode: z.enum(['purchase', 'rental','service']), quantity: z.number().int().min(1).max(60), days: z.number().int().min(1).max(90), packageSlug: z.string().optional() }).strict().refine(validLine,'This item is unavailable in the selected mode.').refine(l=>!l.packageSlug||!!getRecoveryPackage(l.packageSlug),'Unknown recovery package.');
+export const orderSchema = z.object({ lines: z.array(lineSchema).min(1).max(100), address: profileSchema.extend({ phone: z.string().trim().regex(/^\+?[\d ()-]{7,20}$/, 'Enter a valid phone number.'), address: z.string().trim().min(8).max(300), city: z.string().trim().min(2).max(80), pincode: z.string().regex(/^\d{6}$/) }), rentalStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), idempotencyKey: z.string().uuid() }).strict();
+export const requestSchema = z.object({ kind: z.enum(['callback', 'service', 'package']), subject: z.string().trim().min(2).max(100), phone: z.string().trim().regex(/^\+?[\d ()-]{7,20}$/, 'Enter a valid phone number.'), preferredDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), preferredTime: z.enum(['Morning', 'Afternoon', 'Evening']), notes: z.string().trim().max(500), idempotencyKey: z.string().uuid() }).strict();
+export type Profile = z.infer<typeof profileSchema>;
+export type OrderInput = z.infer<typeof orderSchema>;
+export type ServiceInput = z.infer<typeof requestSchema>;
+export type AppUser = Profile & { id: string; email: string };
+export type Order = { id: string; created_at: string; status: string; total: number; deposit: number; subtotal: number; address: Profile; items: { productId: string; name: string; mode: string; quantity: number; days: number; unitPrice: number; deposit: number; packageSlug?: string }[]; rental_start: string | null; payment_status: string };
+export type ServiceRequest = { id: string; created_at: string; kind: string; subject: string; phone: string; preferred_date: string | null; preferred_time: string; notes: string; status: string };

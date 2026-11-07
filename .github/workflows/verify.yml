@@ -1,0 +1,51 @@
+name: Verify website and mobile
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            mobile/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix mobile
+      - run: npm run typecheck
+      - run: npm run test:database
+      - run: npm run build
+      - run: npm run typecheck --prefix mobile
+      - run: npm run export:all --prefix mobile
+      - name: Local website HTTP regression checks
+        run: |
+          npm run dev > /tmp/truora-dev.log 2>&1 &
+          for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:5173/api/auth/session && break || sleep 1; done
+          npm run test:api
+  release_mobile:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/commerce-accounts' && vars.MOBILE_RELEASES_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: mobile-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --prefix mobile
+      - name: Start the native-compatible release workflow
+        working-directory: mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_PUBLIC_EAS_PROJECT_ID: ${{ vars.EXPO_PUBLIC_EAS_PROJECT_ID }}
+        run: npx eas-cli workflow:run release.yml --non-interactive
