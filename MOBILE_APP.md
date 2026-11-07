@@ -65,7 +65,7 @@ Triggers publish only `{refresh:true}` to private `user:<UUID>`, `operations`, a
 
 Add `truora://auth-callback` to Supabase Auth's allowed redirect URLs before testing confirmation/recovery emails on native builds. Production email confirmation and SMTP still need the earlier production setup; demo confirmation remains disabled as previously approved. Configure a trusted mail service before real use. Native password login does not require an email redirect.
 
-## Expo account setup — next handoff
+## Expo account setup
 
 1. Sign into https://expo.dev in the built-in browser using the account that should own Truora. Connect GitHub and grant access to the Truora repository. Account owner should perform any new permission/credential confirmations.
 2. Create/link the Expo project from the **mobile directory**, with app root/base directory `mobile` when asked. Do not connect the root Next.js project to Expo Hosting.
@@ -120,4 +120,4 @@ These checks do not replace native compilation, physical-device testing, push de
 
 Tooling audit: npm currently reports five moderate findings in Expo CLI/fingerprint glob dependencies, with no high or critical production-dependency findings. These are development/build tools, not modules used for patient-data operations in the app. Do not downgrade the SDK to follow npm's incompatible suggested fix; track the upstream tooling patches.
 
-Current setup handoff: Expo project and GitHub association are connected; base directory is `/mobile`. CLI authentication still needs the owner's short-lived device approval. Beta workflow remains manual until the first signed Android build and environment setup succeed. No production store release has been submitted.
+Current setup: Expo project/GitHub association, `/mobile` base directory, CLI authentication and all four public variables in development/preview/production are configured. Android signing is managed in Expo. The first Android APK and iOS simulator cloud builds are in progress; the beta workflow remains manual until those first builds succeed. The owner selected Android and iOS simulator testing for now because Apple Developer membership is not yet active. No production store release has been submitted.

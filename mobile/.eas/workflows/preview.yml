@@ -1,7 +1,7 @@
 name: Truora automatic beta
 on:
   # Add the documented push trigger after first signing/env setup succeeds.
-  workflow_dispatch:
+  workflow_dispatch: {}
 defaults:
   tools:
     node: '24.15.0'

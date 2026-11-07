@@ -1,7 +1,7 @@
 name: Truora mobile release
 # Manual production release until store signing/submissions are configured.
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
 defaults:
   tools:
     node: '24.15.0'
