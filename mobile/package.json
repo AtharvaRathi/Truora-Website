@@ -41,11 +41,10 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "export:web": "expo export --platform web",
-    "build:android": "npx eas-cli@latest build --platform android --profile preview",
-    "build:ios": "npx eas-cli@latest build --platform ios --profile preview",
+    "build:android": "eas build --platform android --profile preview",
+    "build:ios": "eas build --platform ios --profile preview",
     "export:all": "expo export --platform all",
-    "lint": "expo lint",
-    "build:ios:simulator": "npx eas-cli@latest build --platform ios --profile simulator"
+    "lint": "expo lint"
   },
   "private": true
 }

@@ -133,4 +133,4 @@ Current setup: Expo project/GitHub association, `/mobile` base directory, CLI au
 - Updates to `mobile/**` or `packages/core/**` on `feature/commerce-accounts` now run this beta workflow automatically. Compatible downloaded updates normally apply on a subsequent app launch; database record changes refresh through private realtime signals while connected.
 - Public store submission, physical iPhone signing, production SMTP/email verification and tested background push delivery remain separate setup requirements. Demo checkout still collects no payment.
 
-For the currently approved Mac simulator testing, `npm run build:ios:simulator` uses the simulator profile. Physical iPhone builds continue to require Apple signing.
+For the currently approved Mac simulator testing, `npx eas-cli@latest build --platform ios --profile simulator` uses the simulator profile. Physical iPhone builds continue to require Apple signing.
