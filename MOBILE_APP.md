@@ -72,9 +72,9 @@ Add `truora://auth-callback` to Supabase Auth's allowed redirect URLs before tes
 3. The connected project is `@truora/truora` (`444edce5-0161-4fe0-b100-91c92c3374cb`). Configure the Expo project UUID in `EXPO_PUBLIC_EAS_PROJECT_ID`. The dynamic app config reads it for `extra.eas.projectId` and the update URL. Do not invent a project UUID.
 4. In Expo development/preview/production environments set `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `EXPO_PUBLIC_EAS_PROJECT_ID`. These are public application settings. No service-role key, database password, private signing credential or dispatch secret belongs in `EXPO_PUBLIC_*`.
 5. Install/run EAS CLI and authenticate it under the same account. Browser sign-in alone does not automatically authenticate a terminal. Use the supported login flow; keep passwords/2FA private.
-6. Run `eas project:info` from `mobile` and verify the project owner and identifier before creating builds. Choose final app identifiers before the first store registration; current proposed IDs are `com.truora.recovery`.
+6. Run `npx eas-cli@latest project:info` from `mobile` and verify the project owner and identifier before creating builds. Choose final app identifiers before the first store registration; current proposed IDs are `com.truora.recovery`.
 7. Configure Android signing and Apple signing in EAS. Apple membership and registered test devices are needed for iPhone internal/ad hoc distribution. iOS simulator builds can use the simulator profile without a store distribution certificate.
-8. Build Android preview APK: `eas build --platform android --profile preview`. Build an iPhone preview using `--platform ios --profile preview`, or TestFlight with production/store signing. Install on real devices and test both customer and provider flows.
+8. Build Android preview APK: `npx eas-cli@latest build --platform android --profile preview`. Build an iPhone preview using `--platform ios --profile preview`, or TestFlight with production/store signing. Install on real devices and test both customer and provider flows.
 
 ## Automatic releases
 
@@ -120,4 +120,17 @@ These checks do not replace native compilation, physical-device testing, push de
 
 Tooling audit: npm currently reports five moderate findings in Expo CLI/fingerprint glob dependencies, with no high or critical production-dependency findings. These are development/build tools, not modules used for patient-data operations in the app. Do not downgrade the SDK to follow npm's incompatible suggested fix; track the upstream tooling patches.
 
-Current setup: Expo project/GitHub association, `/mobile` base directory, CLI authentication and all four public variables in development/preview/production are configured. Android signing is managed in Expo. The first Android APK and iOS simulator cloud builds are in progress; the beta push trigger is enabled and reuses matching in-progress/finished native builds before publishing compatible updates. The owner selected Android and iOS simulator testing for now because Apple Developer membership is not yet active. No production store release has been submitted.
+Current setup: Expo project/GitHub association, `/mobile` base directory, CLI authentication and all four public variables in development/preview/production are configured. Android signing is managed in Expo. The first Android APK and iOS simulator cloud builds both finished successfully; the beta push trigger is enabled and reuses matching in-progress/finished native builds before publishing compatible updates. The owner selected Android and iOS simulator testing for now because Apple Developer membership is not yet active. No production store release has been submitted.
+
+## Verified beta delivery — 7 November 2026
+
+- [Android APK download](https://expo.dev/artifacts/eas/DxEyaDzclI0KV6XgcWPCYoCJ69dm1J4KdPa0RhQ5vWc.apk) · approximately 92 MB · build 0481247a-373e-49e5-b667-49c11b02fcbd.
+- [iOS simulator archive for Mac](https://expo.dev/artifacts/eas/Ul1nVU8jn4f3ACN2epOt4K_-NXMpNFfIAYwgfCVRpbw.tar.gz) · approximately 25 MB · build 6ee50a05-b6c5-4d17-bd02-38ce21bdadce.
+- The local copies are ignored outputs: `outputs/Truora-Android-beta.apk` and `outputs/Truora-iOS-simulator.tar.gz`. Their hashes and integrity checks are recorded in the same output directory.
+- The Android APK installs directly on a compatible Android device. Sign in with the existing Truora website account; operational permissions come from the same team membership.
+- The iOS archive is for Xcode Simulator on a Mac. It does not install on a physical iPhone. The owner selected simulator testing until Apple Developer membership/signing is available.
+- GitHub push 52aa1ef started Expo workflow 01a1b649-caad-77f2-95d3-9e93e62aaa8d automatically. Verification, both compatibility lookups and both update-publication jobs succeeded. Both native-build jobs were skipped because existing compatible builds were found.
+- Updates to `mobile/**` or `packages/core/**` on `feature/commerce-accounts` now run this beta workflow automatically. Compatible downloaded updates normally apply on a subsequent app launch; database record changes refresh through private realtime signals while connected.
+- Public store submission, physical iPhone signing, production SMTP/email verification and tested background push delivery remain separate setup requirements. Demo checkout still collects no payment.
+
+For the currently approved Mac simulator testing, `npm run build:ios:simulator` uses the simulator profile. Physical iPhone builds continue to require Apple signing.
