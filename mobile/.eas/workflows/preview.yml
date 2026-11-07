@@ -1,6 +1,8 @@
 name: Truora automatic beta
 on:
-  # Add the documented push trigger after first signing/env setup succeeds.
+  push:
+    branches: ['feature/commerce-accounts']
+    paths: ['mobile/**', 'packages/core/**']
   workflow_dispatch: {}
 defaults:
   tools:
