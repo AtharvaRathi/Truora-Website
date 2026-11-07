@@ -1,5 +1,5 @@
 import {Tabs} from 'expo-router';
 import {Ionicons} from '@expo/vector-icons';
-import {useTruora} from '../../src/provider';
+import {useTruora} from '../../provider';
 const icons={index:'home-outline',explore:'grid-outline',cart:'bag-outline',account:'person-outline',workspace:'briefcase-outline'} as const;
 export default function TabsLayout(){const {account,cart}=useTruora();return <Tabs screenOptions={({route})=>({headerShown:false,tabBarActiveTintColor:'#173e42',tabBarInactiveTintColor:'#7c8b84',tabBarStyle:{backgroundColor:'#fff',borderTopColor:'#dce5df',paddingTop:7},tabBarLabelStyle:{fontSize:10,fontFamily:'DMSans'},tabBarIcon:({color,size})=><Ionicons name={icons[route.name as keyof typeof icons]||'ellipse-outline'} color={typeof color==='string'?color:'#173e42'} size={size}/>})}><Tabs.Screen name="index" options={{title:'Home'}}/><Tabs.Screen name="explore" options={{title:'Explore'}}/><Tabs.Screen name="cart" options={{title:'Your bag',tabBarBadge:cart.length||undefined}}/><Tabs.Screen name="account" options={{title:'Account'}}/><Tabs.Screen name="workspace" options={{title:'Team',href:account?.member?'/workspace':null}}/></Tabs>}

@@ -55,7 +55,7 @@ npm run export:all --prefix mobile
 node scripts/preview-mobile.mjs
 ```
 
-Open http://127.0.0.1:8081. Device-only push, signing and secure storage must be tested using native builds. Android SDK is not currently installed on this machine; no signed native binary is claimed by a JavaScript export.
+Open http://127.0.0.1:8081. Device-only push, signing and secure storage must be tested using native builds. Android SDK is not currently installed on this machine. The iOS simulator app was compiled locally; JavaScript exports alone do not verify native installation.
 
 ## Supabase installation and realtime
 
@@ -69,7 +69,7 @@ Add `truora://auth-callback` to Supabase Auth's allowed redirect URLs before tes
 
 1. Sign into https://expo.dev in the built-in browser using the account that should own Truora. Connect GitHub and grant access to the Truora repository. Account owner should perform any new permission/credential confirmations.
 2. Create/link the Expo project from the **mobile directory**, with app root/base directory `mobile` when asked. Do not connect the root Next.js project to Expo Hosting.
-3. Configure the Expo project UUID in `EXPO_PUBLIC_EAS_PROJECT_ID`. The dynamic app config reads it for `extra.eas.projectId` and the update URL. Do not invent a project UUID.
+3. The connected project is `@truora/truora` (`444edce5-0161-4fe0-b100-91c92c3374cb`). Configure the Expo project UUID in `EXPO_PUBLIC_EAS_PROJECT_ID`. The dynamic app config reads it for `extra.eas.projectId` and the update URL. Do not invent a project UUID.
 4. In Expo development/preview/production environments set `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `EXPO_PUBLIC_EAS_PROJECT_ID`. These are public application settings. No service-role key, database password, private signing credential or dispatch secret belongs in `EXPO_PUBLIC_*`.
 5. Install/run EAS CLI and authenticate it under the same account. Browser sign-in alone does not automatically authenticate a terminal. Use the supported login flow; keep passwords/2FA private.
 6. Run `eas project:info` from `mobile` and verify the project owner and identifier before creating builds. Choose final app identifiers before the first store registration; current proposed IDs are `com.truora.recovery`.
@@ -80,9 +80,9 @@ Add `truora://auth-callback` to Supabase Auth's allowed redirect URLs before tes
 
 `.github/workflows/verify.yml` runs website/mobile type checks, database checks, website production build, native/web JavaScript exports and local HTTP regressions. The existing Vercel Git integration still deploys the website from `feature/commerce-accounts`.
 
-The mobile release job is deliberately inactive until Expo/store credentials exist: enable the repository variable `MOBILE_RELEASES_ENABLED=true` only after setup. It runs after checks succeed, using GitHub's `mobile-production` environment and an `EXPO_TOKEN` secret. Add the public Expo project UUID as the matching repository variable. Do not commit tokens.
+After initial signing/environment setup, enable the documented push trigger on `mobile/.eas/workflows/preview.yml` for changes to `mobile/**` or `packages/core/**` on `feature/commerce-accounts`. That workflow checks the mobile code and shared database/website before fingerprinting. It builds an Android preview APK and iOS simulator app when a compatible build does not exist; otherwise it publishes a compatible update to the preview branch. A simulator build runs on a Mac, not a physical iPhone. Physical iPhone distribution requires Apple signing and its own configured profile. This integration does not require copying a personal Expo token into GitHub Actions.
 
-`mobile/.eas/workflows/release.yml` follows Expo's fingerprint-based release pattern: reuse a compatible native build and publish an OTA update, or build and submit a new native binary when the runtime changed. Configure the production update channel to the production branch. Store submissions must be configured first. Automatic upload is not automatic store approval or installation.
+`mobile/.eas/workflows/release.yml` is prepared for a manual production release after store setup. It uses the same fingerprint-based approach with production builds and store submissions. After store credentials and listings are tested, add the desired production push trigger to this workflow. Automatic upload is not automatic store approval or installation. Configure preview and production update channels to their corresponding branches.
 
 Do not enable production release automation against incomplete store listings or untested production credentials. Database changes must be applied and verified before deploying clients that require them. Earlier migrations were installed manually, so initialise/repair Supabase migration history to match the applied versions before enabling CLI-driven migration automation; never re-run 001–008 blindly. Keep schema changes backward compatible with installed versions and use staged feature flags for features needing new native capabilities.
 
@@ -117,3 +117,7 @@ Create Google Play and Apple Developer accounts under the correct legal owner. P
 - `npx expo-doctor` from `mobile`
 
 These checks do not replace native compilation, physical-device testing, push delivery testing or store review. The operations lists retain the current bounded snapshot limits (latest 200, audit 100, visit window -7/+60 days); global pagination/history expansion remains a production scaling task.
+
+Tooling audit: npm currently reports five moderate findings in Expo CLI/fingerprint glob dependencies, with no high or critical production-dependency findings. These are development/build tools, not modules used for patient-data operations in the app. Do not downgrade the SDK to follow npm's incompatible suggested fix; track the upstream tooling patches.
+
+Current setup handoff: Expo project and GitHub association are connected; base directory is `/mobile`. CLI authentication still needs the owner's short-lived device approval. Beta workflow remains manual until the first signed Android build and environment setup succeed. No production store release has been submitted.

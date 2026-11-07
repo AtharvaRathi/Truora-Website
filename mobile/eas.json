@@ -16,12 +16,14 @@
       "environment": "preview",
       "android": {
         "buildType": "apk"
-      }
+      },
+      "node": "24.15.0"
     },
     "production": {
       "autoIncrement": true,
       "channel": "production",
-      "environment": "production"
+      "environment": "production",
+      "node": "24.15.0"
     },
     "simulator": {
       "extends": "preview",

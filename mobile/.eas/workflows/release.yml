@@ -1,9 +1,24 @@
 name: Truora mobile release
-# Triggered only by the verified GitHub release job, after project/signing setup.
+# Manual production release until store signing/submissions are configured.
 on:
   workflow_dispatch:
+defaults:
+  tools:
+    node: '24.15.0'
+concurrency:
+  group: truora-production
 jobs:
+  verify:
+    environment: production
+    steps:
+      - uses: eas/checkout
+      - uses: eas/install_node_modules
+      - run: npm ci --prefix ..
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:database --prefix ..
   fingerprint:
+    needs: [verify]
     type: fingerprint
     environment: production
   android_existing:

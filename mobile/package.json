@@ -30,6 +30,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~58.0.4",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -41,7 +43,8 @@
     "export:web": "expo export --platform web",
     "build:android": "eas build --platform android --profile preview",
     "build:ios": "eas build --platform ios --profile preview",
-    "export:all": "expo export --platform all"
+    "export:all": "expo export --platform all",
+    "lint": "expo lint"
   },
   "private": true
 }

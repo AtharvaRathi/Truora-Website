@@ -1,6 +1,6 @@
 import {useLocalSearchParams,router} from 'expo-router';
-import {useTruora} from '../../src/provider';
-import {lineLabel,money} from '../../../packages/core/catalog';
-import {prettyStatus} from '../../../packages/core/workspace';
-import {Badge,Button,Card,Heading,Kicker,Notice,Page,Txt,s} from '../../src/ui';
+import {useTruora} from '../../provider';
+import {lineLabel,money} from '../../../../packages/core/catalog';
+import {prettyStatus} from '../../../../packages/core/workspace';
+import {Badge,Button,Card,Heading,Kicker,Notice,Page,Txt,s} from '../../ui';
 export default function Order(){const {id}=useLocalSearchParams<{id:string}>();const {account,refresh}=useTruora();const o=account?.orders.find(o=>o.id===id);return <Page back title="YOUR ORDER" refresh={()=>void refresh()}>{!o?<><Heading>Order unavailable.</Heading><Button title="Refresh account" onPress={()=>void refresh()}/></>:<><Kicker>ORDER #{o.id.slice(0,8).toUpperCase()}</Kicker><Heading>A little more organised.</Heading><Badge>{prettyStatus(o.status)}</Badge><Notice>Demo order saved · No payment collected, delivery or equipment reservation confirmed.</Notice>{o.items.map((i,n)=><Card key={n}><Heading small>{i.name}</Heading><Txt>{i.quantity} × {money(i.unitPrice)} · {lineLabel({...i,mode:i.mode as 'rental'|'purchase'|'service'})}</Txt><Txt style={s.price}>{money(i.quantity*i.unitPrice)}</Txt></Card>)}<Card><Heading small>Order summary</Heading><Txt>Selections {money(o.subtotal)}</Txt><Txt>Refundable sample deposits {money(o.deposit)}</Txt><Txt style={s.price}>{money(o.total)}</Txt><Txt>{o.address.name}{'\n'}{o.address.address}{'\n'}{o.address.city} {o.address.pincode}{'\n'}{o.address.phone}</Txt>{o.rental_start&&<Txt>Rental start: {o.rental_start}</Txt>}</Card>{account?.recoveryPlans.filter(p=>p.order_id===id).map(p=><Button key={p.id} title={`Track ${p.name}`} onPress={()=>router.push({pathname:'/recovery/[id]',params:{id:p.id}})}/>)}</>}</Page>}

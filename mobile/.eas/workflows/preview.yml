@@ -1,0 +1,72 @@
+name: Truora automatic beta
+on:
+  # Add the documented push trigger after first signing/env setup succeeds.
+  workflow_dispatch:
+defaults:
+  tools:
+    node: '24.15.0'
+concurrency:
+  group: truora-beta
+jobs:
+  verify:
+    environment: preview
+    steps:
+      - uses: eas/checkout
+      - uses: eas/install_node_modules
+      - run: npm ci --prefix ..
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run typecheck --prefix ..
+      - run: npm run test:database --prefix ..
+      - run: npm run build --prefix ..
+  fingerprint:
+    needs: [verify]
+    type: fingerprint
+    environment: preview
+  android_existing:
+    needs: [fingerprint]
+    type: get-build
+    params:
+      platform: android
+      profile: preview
+      wait_for_in_progress: true
+      fingerprint_hash: ${{ needs.fingerprint.outputs.android_fingerprint_hash }}
+  ios_existing:
+    needs: [fingerprint]
+    type: get-build
+    params:
+      platform: ios
+      profile: simulator
+      simulator: true
+      wait_for_in_progress: true
+      fingerprint_hash: ${{ needs.fingerprint.outputs.ios_fingerprint_hash }}
+  android_build:
+    needs: [android_existing]
+    if: ${{ !needs.android_existing.outputs.build_id }}
+    type: build
+    params:
+      platform: android
+      profile: preview
+  ios_simulator_build:
+    needs: [ios_existing]
+    if: ${{ !needs.ios_existing.outputs.build_id }}
+    type: build
+    params:
+      platform: ios
+      profile: simulator
+  android_update:
+    needs: [android_existing]
+    if: ${{ needs.android_existing.outputs.build_id }}
+    type: update
+    environment: preview
+    params:
+      branch: preview
+      platform: android
+  ios_update:
+    needs: [ios_existing]
+    if: ${{ needs.ios_existing.outputs.build_id }}
+    type: update
+    environment: preview
+    params:
+      branch: preview
+      platform: ios
